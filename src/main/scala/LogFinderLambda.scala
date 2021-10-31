@@ -31,6 +31,7 @@ object LogFinderLambda  {
       case Some(value) => value
       case None => throw new RuntimeException("Cannot obtain a reference to the config data.")
     }
+
     val awsCredentials: BasicAWSCredentials = new BasicAWSCredentials(config.getString("randomLogGenerator.awsAccessKey"), config.getString("randomLogGenerator.awsSecretKey"))
     val s3Client: AmazonS3 = AmazonS3ClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).withRegion(Regions.US_EAST_2).build()
     val bucketName = config.getString("randomLogGenerator.s3BucketName")
@@ -40,15 +41,16 @@ object LogFinderLambda  {
     val S3Object: S3Object = s3Client.getObject(getRequest)
     val objectData: java.io.InputStream = S3Object.getObjectContent()
 
-    val lines: List[String] = IOUtils.readLines(objectData, "UTF-8").asScala.toList
+    // Should use Arrays or Vectors instead of Lists to have direct accesses in O(1)
+    val lines: Vector[String] = IOUtils.readLines(objectData, "UTF-8").asScala.toVector
 
-    val results: List[String] = binarySearch(time, dtInSeconds, lines)
+    val results: Vector[String] = binarySearch(time, dtInSeconds, lines)
 
     println("Done")
 
   }
 
-  def binarySearch(time: LocalTime, dtInSeconds: Long, logs: List[String]): List[String] = {
+  def binarySearch(time: LocalTime, dtInSeconds: Long, logs: Vector[String]): Vector[String] = {
     val start = time.minusSeconds(dtInSeconds)
     val end = time.plusSeconds(dtInSeconds)
 
@@ -61,11 +63,11 @@ object LogFinderLambda  {
     }
 
     // The searched timestamp could be in the logs
-    val foundLogs: List[String] = binarySearchInner(start, end, logs)
+    val foundLogs: Vector[String] = binarySearchInner(start, end, logs)
     return foundLogs
   }
 
-  def binarySearchInner(start: LocalTime, end: LocalTime, logs: List[String]): List[String] = {
+  def binarySearchInner(start: LocalTime, end: LocalTime, logs: Vector[String]): Vector[String] = {
     val length: Int = logs.length
 
     val middleTime: LocalTime = LocalTime.parse(logs(length / 2).split(" ")(0))
@@ -77,10 +79,10 @@ object LogFinderLambda  {
       // found time interval
       // we have to collect all the logs that are in the interval
 
-      val beforeLogs: List[String] = findAllLogsBeforeOrAfter(logs, List.empty, (length / 2) - 1, start, end, Operation.FIND_BEFORE)
-      val afterLogs: List[String] = findAllLogsBeforeOrAfter(logs, List.empty, (length / 2) + 1, start, end, Operation.FIND_AFTER)
+      val beforeLogs: Vector[String] = findAllLogsBeforeOrAfter(logs, Vector.empty, (length / 2) - 1, start, end, Operation.FIND_BEFORE)
+      val afterLogs: Vector[String] = findAllLogsBeforeOrAfter(logs, Vector.empty, (length / 2) + 1, start, end, Operation.FIND_AFTER)
 
-      val foundLogs: List[String] = beforeLogs ::: List(logs(length / 2)) ::: afterLogs
+      val foundLogs: Vector[String] = beforeLogs ++ Vector(logs(length / 2)) ++ afterLogs
 
       return foundLogs
     }
@@ -95,7 +97,7 @@ object LogFinderLambda  {
     }
   }
 
-  def findAllLogsBeforeOrAfter(logs: List[String], foundLogs: List[String], index: Int, start: LocalTime, end: LocalTime, operation: Operation): List[String] = {
+  def findAllLogsBeforeOrAfter(logs: Vector[String], foundLogs: Vector[String], index: Int, start: LocalTime, end: LocalTime, operation: Operation): Vector[String] = {
     val time: LocalTime = LocalTime.parse(logs(index).split(" ")(0))
 
     val isAfter: Boolean = time.isAfter(start)
@@ -103,7 +105,7 @@ object LogFinderLambda  {
 
     if(isAfter && isBefore) {
       val newLog: String = logs(index)
-      val newFoundLogs: List[String] = foundLogs ::: List(newLog)
+      val newFoundLogs: Vector[String] = foundLogs ++ Vector(newLog)
       val newIndex = if(operation == Operation.FIND_BEFORE) then index - 1 else index + 1
       return findAllLogsBeforeOrAfter(logs, newFoundLogs, newIndex, start, end, operation)
     }
