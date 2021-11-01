@@ -1,0 +1,32 @@
+//#service-request-reply
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "grpc";
+option java_outer_classname = "LogFinderProto";
+
+// The greeting service definition.
+service LogFinderService {
+  // Sends a greeting
+  rpc FindLog (FindLogRequest) returns (FindLogReply) {}
+  //#service-request-reply
+  //#service-stream
+  // The stream of incoming HelloRequest messages are
+  // sent out as corresponding HelloReply. From
+  // all clients to all clients, like a chat room.
+  //rpc SayHelloToAll (stream HelloRequest) returns (stream HelloReply) {}
+  //#service-stream
+  //#service-request-reply
+}
+
+// The request message containing the user's name.
+message FindLogRequest {
+  string time = 1;
+  string dtInSeconds = 2;
+}
+
+// The response message containing the greetings
+message FindLogReply {
+  string message = 1;
+}
+//#service-request-reply
