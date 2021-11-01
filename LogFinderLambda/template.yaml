@@ -14,7 +14,7 @@ Resources:
       Handler: lambda.ApiGatewayProxyHandler
       CodeUri: target/scala-3.0.2/lambda-function.jar
       MemorySize: 512
-      Timeout: 15
+      Timeout: 30
       Environment:
         Variables:
           env: staging
