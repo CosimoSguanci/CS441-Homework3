@@ -1,8 +1,11 @@
+package lambda
+
 import HelperUtils.ObtainConfigReference
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.lambda.runtime.Context
-import com.amazonaws.services.lambda.runtime.events.{APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse}
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
 import com.amazonaws.services.s3.model.{GetObjectRequest, S3Object, S3ObjectInputStream}
 import org.apache.commons.io.IOUtils
@@ -14,18 +17,21 @@ import java.time.{Duration, LocalTime}
 enum Operation:
   case FIND_BEFORE, FIND_AFTER
 
-object LogFinderLambda  {
-  def handler(apiGatewayEvent: APIGatewayV2HTTPEvent, context: Context): APIGatewayV2HTTPResponse = {
-    println(s"body = ${apiGatewayEvent.getBody()}")
-    return APIGatewayV2HTTPResponse.builder()
-      .withStatusCode(200)
-      .withBody("okay")
-      .build()
+object LogFinderLambda {
+
+  case class Response(body: String, headers: Map[String,String], statusCode: Int = 200) {
+    def javaHeaders: java.util.Map[String, String] = headers.asJava
   }
 
-  @main def handlerTest = {
-    val time = LocalTime.parse("01:19:10")
-    val dtInSeconds = 10
+  def handle(requestEvent: APIGatewayProxyRequestEvent) : Response = {
+
+    val parameters: Map[String, String] = requestEvent.getQueryStringParameters.asScala.toMap
+
+    //val time = LocalTime.parse("01:19:10")
+    //val dtInSeconds = 10
+
+    val time: LocalTime = LocalTime.parse(parameters.get("time").get)
+    val dtInSeconds: Long = parameters.get("dtInSeconds").get.toLong
 
     val config = ObtainConfigReference("randomLogGenerator") match {
       case Some(value) => value
@@ -46,7 +52,7 @@ object LogFinderLambda  {
 
     val results: Vector[String] = binarySearch(time, dtInSeconds, lines)
 
-    println("Done")
+    Response(results.mkString(","), Map("Content-Type" -> "text/plain"))
 
   }
 

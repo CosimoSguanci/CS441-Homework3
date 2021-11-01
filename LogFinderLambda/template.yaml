@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Transform: AWS::Serverless-2016-10-31
+
+Description: >-
+  A SAM CLI template for a single-endpoint Hello World Lambda function in Scala
+Resources:
+  LogFinderFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: LogFinder
+      Description: LogFinder
+      Runtime: java8
+      Handler: lambda.ApiGatewayProxyHandler
+      CodeUri: target/scala-3.0.2/lambda-function.jar
+      MemorySize: 512
+      Timeout: 15
+      Environment:
+        Variables:
+          env: staging
+      Events:
+        LogFinder:
+          Type: Api
+          Properties:
+            Path: /logfinder
+            Method: GET
+            RequestParameters:
+              - method.request.querystring.time:
+                  Required: true
+                  Caching: true
+              - method.request.querystring.dtInSeconds:
+                  Required: true
+                  Caching: true
+
+Outputs:
+  ApiURL:
+    Description: "API endpoint URL for Prod environment"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/{name}"

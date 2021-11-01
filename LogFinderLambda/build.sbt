@@ -1,4 +1,4 @@
-name := "LogFileGenerator"
+name := "LogFinderLambda"
 
 version := "0.1"
 
@@ -31,3 +31,10 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-lambda-java-core" % awsLambdaJavaCoreVersion,
   "com.amazonaws" % "aws-lambda-java-events" % awsLambdaJavaEventsVersion,
 )
+
+assemblyJarName in assembly := "lambda-function.jar"
+
+assemblyMergeStrategy in assembly := {
+  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+  case x => MergeStrategy.first
+}
