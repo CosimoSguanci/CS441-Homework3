@@ -1,3 +1,5 @@
+package rest
+
 import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.server.Directives.{get, parameters, withRequestTimeout}
