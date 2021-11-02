@@ -15,8 +15,6 @@ val akkaHttpVersion = "10.2.6"
 val akkaStreamVersion = "2.6.17"
 val akkaHttpSprayJsonVersion = "10.2.6"
 val scalajVersion = "2.4.2"
-val grpcNettyVersion = "1.41.0"
-val scalaPbVersion = "0.11.6"
 
 lazy val akkaGrpcVersion = "2.1.0"
 
