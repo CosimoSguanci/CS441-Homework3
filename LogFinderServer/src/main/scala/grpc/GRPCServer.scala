@@ -1,40 +1,24 @@
 package grpc
 
-//#import
-
-
-import java.security.KeyStore
-import java.security.SecureRandom
-import java.security.cert.Certificate
-import java.security.cert.CertificateFactory
-
-import scala.io.Source
-
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
-import akka.http.scaladsl.ConnectionContext
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.HttpsConnectionContext
-import akka.http.scaladsl.model.HttpRequest
-import akka.http.scaladsl.model.HttpResponse
-import akka.pki.pem.DERPrivateKeyLoader
-import akka.pki.pem.PEMDecoder
-import com.typesafe.config.ConfigFactory
-import javax.net.ssl.KeyManagerFactory
-import javax.net.ssl.SSLContext
+import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
+import akka.http.scaladsl.{ConnectionContext, Http, HttpsConnectionContext}
+import akka.pki.pem.{DERPrivateKeyLoader, PEMDecoder}
+import com.typesafe.config.{Config, ConfigFactory}
+import org.slf4j.{Logger, LoggerFactory}
 
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
-import scala.util.Failure
-import scala.util.Success
+import java.security.cert.{Certificate, CertificateFactory}
+import java.security.{KeyStore, SecureRandom}
+import javax.net.ssl.{KeyManagerFactory, SSLContext}
 import scala.concurrent.duration._
-//#import
-
-
-//#server
+import scala.concurrent.{ExecutionContext, Future}
+import scala.io.Source
+import scala.util.{Failure, Success}
 
 // Skeleton implementation reference: https://developer.lightbend.com/guides/akka-grpc-quickstart-scala/
 object GRPCServer {
+  val logger: Logger = LoggerFactory.getLogger(classOf[grpc.GRPCServer.type])
 
   def main(args: Array[String]): Unit = {
     // important to enable HTTP/2 in ActorSystem's config
@@ -48,14 +32,15 @@ object GRPCServer {
 class GRPCServer(system: ActorSystem[_]) {
 
   def run(): Future[Http.ServerBinding] = {
-    implicit val sys = system
+    implicit val sys: ActorSystem[_] = system
     implicit val ec: ExecutionContext = system.executionContext
+    val config: Config = ConfigFactory.load()
 
     val service: HttpRequest => Future[HttpResponse] =
       LogFinderServiceHandler(new LogFinderServiceImpl(system))
 
     val bound: Future[Http.ServerBinding] = Http(system)
-      .newServerAt(interface = "127.0.0.1", port = 8081)
+      .newServerAt(interface = "127.0.0.1", port = config.getInt("akka.grpc.server.port"))
       .enableHttps(serverHttpContext)
       .bind(service)
       .map(_.addToCoordinatedShutdown(hardTerminationDeadline = 10.seconds))
@@ -63,15 +48,14 @@ class GRPCServer(system: ActorSystem[_]) {
     bound.onComplete {
       case Success(binding) =>
         val address = binding.localAddress
-        println("gRPC server bound to {}:{}", address.getHostString, address.getPort)
+        GRPCServer.logger.info("gRPC server bound to {}:{}", address.getHostString, address.getPort)
       case Failure(ex) =>
-        println("Failed to bind gRPC endpoint, terminating system", ex)
+        GRPCServer.logger.error("Failed to bind gRPC endpoint, terminating system", ex)
         system.terminate()
     }
 
     bound
   }
-  //#server
 
 
   private def serverHttpContext: HttpsConnectionContext = {
@@ -98,7 +82,4 @@ class GRPCServer(system: ActorSystem[_]) {
 
   private def readPrivateKeyPem(): String =
     Source.fromResource("certs/server1.key").mkString
-  //#server
-
 }
-//#server

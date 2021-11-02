@@ -28,6 +28,8 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-s3" % awsJavaSdkS3Version
 )
 
+assemblyJarName in assembly := "LogGenerator.jar"
+
 assemblyMergeStrategy in assembly := {
   case PathList("META-INF", xs @ _*) => MergeStrategy.discard
   case x => MergeStrategy.first

@@ -1,29 +1,29 @@
-import java.util.concurrent.TimeUnit
-import akka.actor.{ActorRef, ActorSystem, Props, TypedActor}
+import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.model.HttpEntity
-import akka.http.scaladsl.server.Directives.{delete, get, parameters, path, post, put, withRequestTimeout}
+import akka.http.scaladsl.server.Directives.{get, parameters, withRequestTimeout}
+import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.{PathDirectives, RouteDirectives}
-import akka.http.scaladsl.server.{Route, StandardRoute}
-import akka.pattern.Patterns
-import actors.LogFinderActor
+import com.typesafe.config.{Config, ConfigFactory}
 import scalaj.http.{Http, HttpResponse}
 
-import scala.concurrent.Await
-import scala.concurrent.duration.{Duration, DurationInt}
+import scala.concurrent.duration.DurationInt
 
 
 class RouteConfig(implicit val logFinderActorRef: ActorRef,
                   implicit val system: ActorSystem) {
 
-  val APIGatewayURL = "http://localhost:3000/logfinder"
+  private val config: Config = ConfigFactory.load()
+  private val APIGatewayURL = config.getString("restServer.APIGatewayURL")
 
   val getRoute: Route =
-
     parameters("time", "dtInSeconds") { (time, dtInSeconds) =>
       withRequestTimeout(30.seconds) {
-        PathDirectives.pathPrefix("findlogs"){
+        PathDirectives.pathPrefix("findlogs") {
           get {
-            val APIGatewayResponse: HttpResponse[String] = Http(APIGatewayURL).param("time", time).param("dtInSeconds", dtInSeconds).timeout(15000, 30000).asString
+            val APIGatewayResponse: HttpResponse[String] = Http(APIGatewayURL)
+              .param("time", time).param("dtInSeconds", dtInSeconds)
+              .timeout(config.getInt("restServer.connectionTimeoutMs"), config.getInt("restServer.readTimeoutMs"))
+              .asString
             RouteDirectives.complete(HttpEntity(APIGatewayResponse.body))
           }
         }

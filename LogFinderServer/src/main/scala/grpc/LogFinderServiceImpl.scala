@@ -1,34 +1,26 @@
 package grpc
 
-//#import
+import akka.actor.typed.ActorSystem
+import com.typesafe.config.{Config, ConfigFactory}
+import scalaj.http.{Http, HttpResponse}
+
 import scala.concurrent.Future
 
-import akka.NotUsed
-import akka.actor.typed.ActorSystem
-import akka.stream.scaladsl.BroadcastHub
-import akka.stream.scaladsl.Keep
-import akka.stream.scaladsl.MergeHub
-import akka.stream.scaladsl.Sink
-import akka.stream.scaladsl.Source
-
-//#import
-
-//#service-request-reply
-//#service-stream
 class LogFinderServiceImpl(system: ActorSystem[_]) extends LogFinderService {
   private implicit val sys: ActorSystem[_] = system
-
-/*  //#service-request-reply
-  val (inboundHub: Sink[FindLogRequest, NotUsed], outboundHub: Source[FindLogReply, NotUsed]) =
-    MergeHub.source[FindLogRequest]
-    .map(request => FindLogReply(s"Hello, ${request.time}"))
-      .toMat(BroadcastHub.sink[FindLogReply])(Keep.both)
-      .run()
-  //#service-request-reply*/
+  private val config: Config = ConfigFactory.load()
+  private val APIGatewayURL = config.getString("akka.grpc.server.APIGatewayURL")
 
   override def findLog(request: FindLogRequest): Future[FindLogReply] = {
-    Future.successful(FindLogReply(s"Hello, ${request.time}"))
+    GRPCServer.logger.info("findLog invoked...")
+    GRPCServer.logger.info("Calling API Gateway endpoint...")
+
+    val APIGatewayResponse: HttpResponse[String] = Http(APIGatewayURL)
+      .param("time", request.time)
+      .param("dtInSeconds", request.dtInSeconds)
+      .timeout(config.getInt("akka.grpc.server.connectionTimeoutMs"), config.getInt("akka.grpc.server.readTimeoutMs"))
+      .asString
+
+    Future.successful(FindLogReply(APIGatewayResponse.body))
   }
 }
-//#service-stream
-//#service-request-reply
