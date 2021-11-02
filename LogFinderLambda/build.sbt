@@ -13,6 +13,7 @@ val generexVersion = "1.0.2"
 val awsJavaSdkS3Version = "1.12.99"
 val awsLambdaJavaCoreVersion = "1.2.1"
 val awsLambdaJavaEventsVersion = "3.10.0"
+val json4sVersion = "4.0.3"
 
 resolvers += Resolver.jcenterRepo
 
@@ -30,6 +31,7 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-s3" % awsJavaSdkS3Version,
   "com.amazonaws" % "aws-lambda-java-core" % awsLambdaJavaCoreVersion,
   "com.amazonaws" % "aws-lambda-java-events" % awsLambdaJavaEventsVersion,
+  "org.json4s" %% "json4s-jackson" % json4sVersion
 )
 
 assemblyJarName in assembly := "lambda-function.jar"

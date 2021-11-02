@@ -1,11 +1,11 @@
 package lambda
 
-import HelperUtils.ObtainConfigReference
+import HelperUtils.{CreateLogger, ObtainConfigReference}
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.events.{APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent}
-import com.amazonaws.services.s3.model.{GetObjectRequest, S3Object, S3ObjectInputStream}
+import com.amazonaws.services.s3.model.{AmazonS3Exception, GetObjectRequest, S3Object, S3ObjectInputStream}
 import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
 import com.typesafe.config.Config
 import org.apache.commons.codec.digest.DigestUtils
@@ -44,42 +44,61 @@ object LogFinderLambda {
    * @param requestEvent the API Gateway Request Event that contains the parameters passed by the Client
    * @return the HTTP Response with a JSON response body, that contains either the MD5 hash of the results or an error message.
    */
-  def handle(requestEvent: APIGatewayProxyRequestEvent): Response = { // requestEvent: APIGatewayProxyRequestEvent
+  def handle(requestEvent: APIGatewayProxyRequestEvent): Response = {
 
-    val parameters: Map[String, String] = requestEvent.getQueryStringParameters.asScala.toMap
+    val logger = CreateLogger(classOf[LogFinderLambda.type])
 
-    //val time = LocalTime.parse("16:03:15")
-    //val dtInSeconds = 10
-
-    val time: LocalTime = LocalTime.parse(parameters.get("time").get)
-    val dtInSeconds: Long = parameters.get("dtInSeconds").get.toLong
+    logger.info("Lambda Function Invoked...")
 
     val config = ObtainConfigReference("randomLogGenerator") match {
       case Some(value) => value
       case None => throw new RuntimeException("Cannot obtain a reference to the config data.")
     }
 
-    val awsCredentials: BasicAWSCredentials = new BasicAWSCredentials(config.getString("randomLogGenerator.awsAccessKey"), config.getString("randomLogGenerator.awsSecretKey"))
-    val s3Client: AmazonS3 = AmazonS3ClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).withRegion(Regions.US_EAST_2).build()
-    val bucketName = config.getString("randomLogGenerator.s3BucketName")
+    val parameters: Map[String, String] = requestEvent.getQueryStringParameters.asScala.toMap
 
-    val key = config.getString("randomLogGenerator.s3ObjectKey")
-    val getRequest: GetObjectRequest = new GetObjectRequest(bucketName, key)
-    val S3Object: S3Object = s3Client.getObject(getRequest)
-    val objectData: java.io.InputStream = S3Object.getObjectContent()
+    val time: LocalTime = LocalTime.parse(parameters.get("time").get)
+    val dtInSeconds: Long = parameters.get("dtInSeconds").get.toLong
 
-    // Should use Arrays or Vectors instead of Lists to have direct accesses in O(1)
-    var lines: Vector[String] = IOUtils.readLines(objectData, "UTF-8").asScala.toVector
+    logger.info(s"Parameters: Time ${parameters.get("time").get}, dt ${parameters.get("dtInSeconds").get} s")
 
-    //lines = lines ++ Vector("16:03:15.679 [scala-execution-context-global-17] WARN  HelperUtils.Parameters$ - bf3cg1Z7tG5rae0G5pA5iF9uT9fbg0be3ce2ae2cg2")
+    try {
+      logger.info("Trying to authenticate on AWS S3...")
 
-    val results: Vector[String] = binarySearch(time, dtInSeconds, lines, config)
+      val awsCredentials: BasicAWSCredentials = new BasicAWSCredentials(config.getString("randomLogGenerator.awsAccessKey"), config.getString("randomLogGenerator.awsSecretKey"))
+      val s3Client: AmazonS3 = AmazonS3ClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).withRegion(Regions.US_EAST_2).build()
+      val bucketName = config.getString("randomLogGenerator.s3BucketName")
+      val key = config.getString("randomLogGenerator.s3ObjectKey")
+      val getRequest: GetObjectRequest = new GetObjectRequest(bucketName, key)
+      val S3Object: S3Object = s3Client.getObject(getRequest)
 
-    val responseStatusCode = if (results.length > 0) then 200 else 404
+      logger.info(s"Objects retrieved: the key $key is present in the bucket")
 
-    val responseJson = buildJsonString(results, responseStatusCode, config.getString("randomLogGenerator.lineSplitter"))
+      val objectData: java.io.InputStream = S3Object.getObjectContent()
 
-    Response(responseJson, Map("Content-Type" -> "application/json"), statusCode = responseStatusCode)
+      // Should use Arrays or Vectors instead of Lists to have direct accesses in O(1)
+      var lines: Vector[String] = IOUtils.readLines(objectData, "UTF-8").asScala.toVector
+      val results: Vector[String] = binarySearch(time, dtInSeconds, lines, config)
+
+      logger.info(s"Binary Search performed, found ${results.length} results")
+
+      val responseStatusCode = if (results.length > 0) then 200 else 404
+
+      logger.info(s"HTTP Response Status Code: $responseStatusCode")
+
+      val responseJson = buildJsonString(results, responseStatusCode, config.getString("randomLogGenerator.lineSplitter"))
+      Response(responseJson, Map("Content-Type" -> "application/json"), statusCode = responseStatusCode)
+    } catch {
+      case ex: AmazonS3Exception => {
+        // This means that there are no log files in S3 bucket
+
+        logger.info("The key was not found in the bucket: no logs have been uploaded to AWS S3")
+
+        val responseStatusCode = 404
+        val responseJson = buildJsonString(Vector.empty, responseStatusCode, config.getString("randomLogGenerator.lineSplitter"))
+        Response(responseJson, Map("Content-Type" -> "application/json"), statusCode = responseStatusCode)
+      }
+    }
   }
 
   /**
@@ -128,11 +147,12 @@ object LogFinderLambda {
 
     // The searched timestamp could be in the logs
     val foundLogs: Vector[String] = binarySearchInner(start, end, logs, lineSplitter)
+
     return foundLogs.filter(log => {
       val tokens = log.split(lineSplitter)
       val stringInstance = tokens(tokens.length - 1)
 
-      // I only return the logs that match the right Regex Pattern
+      // only return the logs that match the right Regex Pattern
       stringInstance.matches(config.getString("randomLogGenerator.Pattern"))
     })
   }
@@ -155,28 +175,27 @@ object LogFinderLambda {
 
     val middleTime: LocalTime = LocalTime.parse(logs(length / 2).split(lineSplitter)(0))
 
-    val isAfter: Boolean = middleTime.isAfter(start)
-    val isBefore: Boolean = middleTime.isBefore(end)
+    val isAfterTheStart: Boolean = middleTime.isAfter(start)
+    val isBeforeTheEnd: Boolean = middleTime.isBefore(end)
 
-    if (isAfter && isBefore) {
+    if (isAfterTheStart && isBeforeTheEnd) {
       // found time interval
       // we have to collect all the logs that are in the interval
 
       val beforeLogs: Vector[String] = findAllLogsBeforeOrAfter(logs, Vector.empty, (length / 2) - 1, start, end, Operation.FIND_BEFORE, lineSplitter)
       val afterLogs: Vector[String] = findAllLogsBeforeOrAfter(logs, Vector.empty, (length / 2) + 1, start, end, Operation.FIND_AFTER, lineSplitter)
-
       val foundLogs: Vector[String] = beforeLogs ++ Vector(logs(length / 2)) ++ afterLogs
 
       return foundLogs
     }
 
-    else if (!isAfter) {
-      // we take the 2nd half
-      binarySearchInner(start, end, logs.slice((length / 2) + 1, length), lineSplitter)
-    }
-    else {
+    else if (isAfterTheStart) {
       // we take the 1st half
       binarySearchInner(start, end, logs.slice(0, (length / 2) - 1), lineSplitter)
+    }
+    else {
+      // we take the 2nd half
+      binarySearchInner(start, end, logs.slice((length / 2) + 1, length), lineSplitter)
     }
   }
 
@@ -200,10 +219,10 @@ object LogFinderLambda {
 
     val time: LocalTime = LocalTime.parse(logs(index).split(lineSplitter)(0))
 
-    val isAfter: Boolean = time.isAfter(start)
-    val isBefore: Boolean = time.isBefore(end)
+    val isAfterTheStart: Boolean = time.isAfter(start)
+    val isBeforeTheEnd: Boolean = time.isBefore(end)
 
-    if (isAfter && isBefore) {
+    if (isAfterTheStart && isBeforeTheEnd) {
       val newLog: String = logs(index)
       val newFoundLogs: Vector[String] = foundLogs ++ Vector(newLog)
       val newIndex = if (operation == Operation.FIND_BEFORE) then index - 1 else index + 1
