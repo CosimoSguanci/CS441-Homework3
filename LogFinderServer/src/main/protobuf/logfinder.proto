@@ -5,28 +5,19 @@ option java_multiple_files = true;
 option java_package = "grpc";
 option java_outer_classname = "LogFinderProto";
 
-// The greeting service definition.
+// Log Finder Service definition
 service LogFinderService {
-  // Sends a greeting
+  // Finds a log in the AWS S3 log files
   rpc FindLog (FindLogRequest) returns (FindLogReply) {}
-  //#service-request-reply
-  //#service-stream
-  // The stream of incoming HelloRequest messages are
-  // sent out as corresponding HelloReply. From
-  // all clients to all clients, like a chat room.
-  //rpc SayHelloToAll (stream HelloRequest) returns (stream HelloReply) {}
-  //#service-stream
-  //#service-request-reply
 }
 
-// The request message containing the user's name.
+// The request message containing details about the searched time interval (the time and the delta to compute the time intervals)
 message FindLogRequest {
   string time = 1;
   string dtInSeconds = 2;
 }
 
-// The response message containing the greetings
+// The response message containing the JSON response to the Client (contains the MD5 hash of the regex instances in found logs)
 message FindLogReply {
   string message = 1;
 }
-//#service-request-reply

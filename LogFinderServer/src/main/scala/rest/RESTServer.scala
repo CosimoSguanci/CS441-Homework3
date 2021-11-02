@@ -9,6 +9,10 @@ import org.slf4j.{Logger, LoggerFactory}
 import rest.actors.LogFinderActor
 
 // Skeleton implementation reference: https://vikasontech.github.io/post/scala-rest-api-with-akka-http/
+
+/**
+ * Objects that implements a REST Server, that handles the GET request to find logs.
+ */
 object RESTServer extends App {
   implicit val system: ActorSystem = ActorSystem("web-app")
   implicit val logFinderActorRef: ActorRef = system.actorOf(Props(new LogFinderActor()))

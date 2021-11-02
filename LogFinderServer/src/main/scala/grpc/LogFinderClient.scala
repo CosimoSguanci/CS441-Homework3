@@ -9,6 +9,9 @@ import org.slf4j.{Logger, LoggerFactory}
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
+/**
+ * Client that performs calls to the GRPC Server to find logs in the specified time intervals
+ */
 object LogFinderClient {
 
   def main(args: Array[String]): Unit = {

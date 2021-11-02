@@ -17,11 +17,14 @@ import scala.io.Source
 import scala.util.{Failure, Success}
 
 // Skeleton implementation reference: https://developer.lightbend.com/guides/akka-grpc-quickstart-scala/
+
+/**
+ * Objects that implements a GRPC Server, that handles the calls from the Client to find logs.
+ */
 object GRPCServer {
   val logger: Logger = LoggerFactory.getLogger(classOf[grpc.GRPCServer.type])
 
   def main(args: Array[String]): Unit = {
-    // important to enable HTTP/2 in ActorSystem's config
     val conf = ConfigFactory.parseString("akka.http.server.preview.enable-http2 = on")
       .withFallback(ConfigFactory.defaultApplication())
     val system = ActorSystem[Nothing](Behaviors.empty, "LogFinderServer", conf)
@@ -57,7 +60,9 @@ class GRPCServer(system: ActorSystem[_]) {
     bound
   }
 
-
+  /**
+   * Defines HTTPS Connection Context
+   */
   private def serverHttpContext: HttpsConnectionContext = {
     val privateKey =
       DERPrivateKeyLoader.load(PEMDecoder.decode(readPrivateKeyPem()))

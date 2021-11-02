@@ -7,6 +7,9 @@ object LogFinderActor {
   case object Get
 }
 
+/**
+ * Defines endpoints for the LogFinder
+ */
 class LogFinderActor extends Actor {
 
   import LogFinderActor._
