@@ -34,15 +34,15 @@ class LogFinderLambdaTest extends AnyFlatSpec with Matchers {
 
   it should "correctly locate a log that is in the specified time interval" in {
     val logs: Vector[String] = Vector(
-      "11:44:27.098 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - cg1be3be0bg2ae3J8vX7nO7gaf0V5hF8uW8jag3",
-      "11:44:27.200 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - cg1be3be0bg2ae3J8vX7nO7gaf0..V5hF8uW8jag3",
-      "11:44:28.241 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - cg1be3be0bg2ae3J8vX7nO7gaf0..V5hF8uW8jag3",
-      "11:44:29.241 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - bf2A6vae3ag3ag3cf2ag0ag0J8jZ7jR7nZ8k",
-      "11:44:29.565 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - bf2A6vae3ag3ag3cf2ag0ag0J8jZ7jR7nZ8k",
-      "11:44:30.211 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - bf2A6vae3ag3ag3.cf2ag0ag0J8jZ7jR7nZ8k",
+      "11:44:27.098 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - testtesttesttesttest",
+      "11:44:27.200 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - testtesttesttesttest",
+      "11:44:28.241 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - testtesttesttesttest",
+      "11:44:29.241 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - testtesttesttesttest",
+      "11:44:29.565 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - testtesttesttesttest",
+      "11:44:30.211 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - testtesttesttesttest",
       "11:44:30.809 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - B5tce1Q7hQ9kC5uaf3Q8gG7nbf3E8lce1J8qce3",
-      "11:44:31.444 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - bf2A6vae3ag3ag3cf,,2ag0ag0J8jZ7jR7nZ8k",
-      "11:44:32.234 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - bf2A6vae3ag3ag3cf2ag0ag0J8jZ7jR7nZ8k"
+      "11:44:31.444 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - testtesttesttesttest",
+      "11:44:32.234 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - testtesttesttesttest"
     )
 
     val time: LocalTime = LocalTime.parse("11:44:31")
@@ -61,15 +61,15 @@ class LogFinderLambdaTest extends AnyFlatSpec with Matchers {
 
   it should "correctly return an empty vector if no logs are found" in {
     val logs: Vector[String] = Vector(
-      "11:44:27.098 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - cg1be3be0bg2ae3J8vX7nO7gaf0V5hF8uW8jag3",
-      "11:44:27.200 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - cg1be3be0bg2ae3J8vX7nO7gaf0..V5hF8uW8jag3",
-      "11:44:28.241 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - cg1be3be0bg2ae3J8vX7nO7gaf0..V5hF8uW8jag3",
-      "11:44:29.241 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - bf2A6vae3ag3ag3cf2ag0ag0J8jZ7jR7nZ8k",
-      "11:44:29.565 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - bf2A6vae3ag3ag3cf2ag0ag0J8jZ7jR7nZ8k",
-      "11:44:30.211 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - bf2A6vae3ag3ag3.cf2ag0ag0J8jZ7jR7nZ8k",
-      "11:44:30.809 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - B5tce1Q7hQ9kC5uaf3Q8gG7nbf3E8lce1J8qce3.",
-      "11:44:31.444 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - bf2A6vae3ag3ag3cf,,2ag0ag0J8jZ7jR7nZ8k",
-      "11:44:32.234 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - bf2A6vae3ag3ag3cf2ag0ag0J8jZ7jR7nZ8k"
+      "11:44:27.098 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - testtesttesttesttest",
+      "11:44:27.200 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - testtesttesttesttest",
+      "11:44:28.241 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - testtesttesttesttest",
+      "11:44:29.241 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - testtesttesttesttest",
+      "11:44:29.565 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - testtesttesttesttest",
+      "11:44:30.211 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - testtesttesttesttest",
+      "11:44:30.809 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - testtesttesttesttest",
+      "11:44:31.444 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - testtesttesttesttest",
+      "11:44:32.234 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - testtesttesttesttest"
     )
 
     val time: LocalTime = LocalTime.parse("11:44:31")

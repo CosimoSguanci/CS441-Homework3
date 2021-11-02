@@ -30,8 +30,8 @@ object LogFinderLambda {
   /**
    * Case class that represents a response returned to the client
    *
-   * @param body the body of the HTTP response
-   * @param headers the headers of the HTTP response
+   * @param body       the body of the HTTP response
+   * @param headers    the headers of the HTTP response
    * @param statusCode the statusCode of the HTTP response, it can be 200 (OK) or 404 (Not found)
    */
   case class Response(body: String, headers: Map[String, String], statusCode: Int = 200) {
@@ -44,7 +44,7 @@ object LogFinderLambda {
    * @param requestEvent the API Gateway Request Event that contains the parameters passed by the Client
    * @return the HTTP Response with a JSON response body, that contains either the MD5 hash of the results or an error message.
    */
-  def handle(requestEvent: APIGatewayProxyRequestEvent): Response = {
+  def handle(requestEvent: APIGatewayProxyRequestEvent): Response = { // requestEvent: APIGatewayProxyRequestEvent
 
     val logger = CreateLogger(classOf[LogFinderLambda.type])
 
@@ -59,6 +59,9 @@ object LogFinderLambda {
 
     val time: LocalTime = LocalTime.parse(parameters.get("time").get)
     val dtInSeconds: Long = parameters.get("dtInSeconds").get.toLong
+
+    //val time: LocalTime = LocalTime.parse("21:59:29")
+    //val dtInSeconds: Long = "1".toLong
 
     logger.info(s"Parameters: Time ${parameters.get("time").get}, dt ${parameters.get("dtInSeconds").get} s")
 
@@ -104,8 +107,8 @@ object LogFinderLambda {
   /**
    * Builds the JSON string to be used as Response body
    *
-   * @param results the results of the Binary Search, as a Vector
-   * @param statusCode the statusCode of the HTTP response, it can be 200 (OK) or 404 (Not found)
+   * @param results      the results of the Binary Search, as a Vector
+   * @param statusCode   the statusCode of the HTTP response, it can be 200 (OK) or 404 (Not found)
    * @param lineSplitter the character to be used as delimiter to get the various sections of the log line (e.g., the String instance)
    * @return the JSON string to be embedded in the HTTP Response Body
    */
@@ -126,10 +129,10 @@ object LogFinderLambda {
   /**
    * Performs the Binary Search on the raw log files retrieved from AWS S3
    *
-   * @param time the time passed by the Client
+   * @param time        the time passed by the Client
    * @param dtInSeconds the time delta passed by the Client, used to compute the time interval to be considered
-   * @param logs a Vector containing the log lines
-   * @param config configuration instance
+   * @param logs        a Vector containing the log lines
+   * @param config      configuration instance
    * @return a Vector containing only the lines of the log that are in the specified time interval, and that match the Regex Pattern defined in configuration
    */
   def binarySearch(time: LocalTime, dtInSeconds: Long, logs: Vector[String], config: Config): Vector[String] = {
@@ -151,18 +154,19 @@ object LogFinderLambda {
     return foundLogs.filter(log => {
       val tokens = log.split(lineSplitter)
       val stringInstance = tokens(tokens.length - 1)
+      val regexPattern = new Regex(config.getString("randomLogGenerator.Pattern"))
 
       // only return the logs that match the right Regex Pattern
-      stringInstance.matches(config.getString("randomLogGenerator.Pattern"))
+      regexPattern.findFirstIn(stringInstance).getOrElse(null) != null
     })
   }
 
   /**
    * Inner recursive function that actually performs the binary search in log files
    *
-   * @param start the start of the searched time intervals
-   * @param end the end of the searched time intervals
-   * @param logs a Vector containing the log lines
+   * @param start        the start of the searched time intervals
+   * @param end          the end of the searched time intervals
+   * @param logs         a Vector containing the log lines
    * @param lineSplitter the character to be used as delimiter to get the various sections of the log line (e.g., the String instance)
    * @return a Vector containing only the lines of the log that are in the specified time interval
    */
@@ -203,12 +207,12 @@ object LogFinderLambda {
    * Inner recursive function that is called once a log that is in the searched time interval is found. This function is needed to get all the other logs that are
    * in the time interval, both those that are before the first log found and those that are after it in the log file.
    *
-   * @param logs a Vector containing the log lines
-   * @param foundLogs a Vector containing only the lines of the log that are in the specified time interval, updated at every recursive call
-   * @param index current index in the log Vector
-   * @param start the start of the searched time intervals
-   * @param end the end of the searched time intervals
-   * @param operation determines if we have to increase the index or decrease it
+   * @param logs         a Vector containing the log lines
+   * @param foundLogs    a Vector containing only the lines of the log that are in the specified time interval, updated at every recursive call
+   * @param index        current index in the log Vector
+   * @param start        the start of the searched time intervals
+   * @param end          the end of the searched time intervals
+   * @param operation    determines if we have to increase the index or decrease it
    * @param lineSplitter the character to be used as delimiter to get the various sections of the log line (e.g., the String instance)
    * @return the found logs that are in the right time interval before or after the starting index
    */
