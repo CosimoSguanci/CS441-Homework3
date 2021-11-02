@@ -20,7 +20,7 @@ object LogFinderClient {
     val logger: Logger = LoggerFactory.getLogger(classOf[grpc.LogFinderClient.type])
     val config: Config = ConfigFactory.load()
 
-    val client = LogFinderServiceClient(GrpcClientSettings.fromConfig("logfinder.LogFinderService"))
+    val client = LogFinderServiceClient(GrpcClientSettings.fromConfig("logfinder.LogFinderService").withTls(false))
 
     singleRequestReply(config.getString("akka.grpc.client.example_time"), config.getString("akka.grpc.client.example_dt_seconds"))
 

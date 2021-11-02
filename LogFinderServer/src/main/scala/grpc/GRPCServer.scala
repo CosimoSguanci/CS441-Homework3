@@ -44,7 +44,7 @@ class GRPCServer(system: ActorSystem[_]) {
 
     val bound: Future[Http.ServerBinding] = Http(system)
       .newServerAt(interface = "127.0.0.1", port = config.getInt("akka.grpc.server.port"))
-      .enableHttps(serverHttpContext)
+      //.enableHttps(serverHttpContext)
       .bind(service)
       .map(_.addToCoordinatedShutdown(hardTerminationDeadline = 10.seconds))
 
