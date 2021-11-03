@@ -14,7 +14,7 @@ import scala.concurrent.duration.DurationInt
  * Defines endpoints behavior
  *
  * @param logFinderActorRef reference to the log finder actor
- * @param system Actor System
+ * @param system            Actor System
  */
 class RouteConfig(implicit val logFinderActorRef: ActorRef,
                   implicit val system: ActorSystem) {
