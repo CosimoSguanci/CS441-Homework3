@@ -1,3 +1,5 @@
+import sbtassembly.AssemblyPlugin.autoImport.assemblyMergeStrategy
+
 name := "LogFileGenerator"
 
 version := "0.1"
@@ -14,23 +16,27 @@ val awsJavaSdkS3Version = "1.12.99"
 
 resolvers += Resolver.jcenterRepo
 
-libraryDependencies ++= Seq(
-  "ch.qos.logback" % "logback-core" % logbackVersion,
-  "ch.qos.logback" % "logback-classic" % logbackVersion,
-  "org.slf4j" % "slf4j-api" % sfl4sVersion,
-  "com.typesafe" % "config" % typesafeConfigVersion,
-  "commons-io" % "commons-io" % apacheCommonIOVersion,
-  "org.scalactic" %% "scalactic" % scalacticVersion,
-  "org.scalatest" %% "scalatest" % scalacticVersion % Test,
-  "org.scalatest" %% "scalatest-featurespec" % scalacticVersion % Test,
-  "com.typesafe" % "config" % typesafeConfigVersion,
-  "com.github.mifmif" % "generex" % generexVersion,
-  "com.amazonaws" % "aws-java-sdk-s3" % awsJavaSdkS3Version
-)
-
-assemblyJarName in assembly := "LogGenerator.jar"
+lazy val root = (project in file(".")).
+  settings(
+    scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked"),
+    libraryDependencies ++= Seq(
+      "ch.qos.logback" % "logback-core" % logbackVersion,
+      "ch.qos.logback" % "logback-classic" % logbackVersion % "runtime",
+      "org.slf4j" % "slf4j-api" % sfl4sVersion,
+      "com.typesafe" % "config" % typesafeConfigVersion,
+      "commons-io" % "commons-io" % apacheCommonIOVersion,
+      "org.scalactic" %% "scalactic" % scalacticVersion,
+      "org.scalatest" %% "scalatest" % scalacticVersion % Test,
+      "org.scalatest" %% "scalatest-featurespec" % scalacticVersion % Test,
+      "com.typesafe" % "config" % typesafeConfigVersion,
+      "com.github.mifmif" % "generex" % generexVersion,
+      "com.amazonaws" % "aws-java-sdk-s3" % awsJavaSdkS3Version
+    ),
+    assemblyJarName := "LogGenerator.jar",
+  )
 
 assemblyMergeStrategy in assembly := {
-  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
-  case x => MergeStrategy.first
+  case PathList("module-info.class") => MergeStrategy.discard
+  case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
+  case _ => MergeStrategy.first
 }
