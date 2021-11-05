@@ -80,7 +80,7 @@ lazy val root = (project in file(".")).
       "com.typesafe.akka" %% "akka-actor-testkit-typed" % akkaStreamVersion % Test,
       "com.typesafe.akka" %% "akka-stream-testkit" % akkaStreamVersion % Test,
     ),
-    assemblyJarName := "Server.jar",
+    assemblyJarName := "LogFinderServer.jar",
   )
 
 assemblyMergeStrategy in assembly := {

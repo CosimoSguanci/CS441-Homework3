@@ -3,7 +3,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 
 Description: >-
-  A SAM CLI template for a single-endpoint Hello World Lambda function in Scala
+  Lambda Function used to perform searches in log files (CS441 - Homework 3)
 Resources:
   LogFinderFunction:
     Type: AWS::Serverless::Function
@@ -12,7 +12,7 @@ Resources:
       Description: LogFinder
       Runtime: java8
       Handler: lambda.ApiGatewayProxyHandler
-      CodeUri: target/scala-3.0.2/lambda-function.jar
+      CodeUri: target/scala-3.0.2/LogFinderLambda.jar
       MemorySize: 512
       Timeout: 30
       Environment:

@@ -34,7 +34,7 @@ libraryDependencies ++= Seq(
   "org.json4s" %% "json4s-jackson" % json4sVersion
 )
 
-assemblyJarName in assembly := "lambda-function.jar"
+assemblyJarName in assembly := "LogFinderLambda.jar"
 
 assemblyMergeStrategy in assembly := {
   case PathList("META-INF", xs @ _*) => MergeStrategy.discard

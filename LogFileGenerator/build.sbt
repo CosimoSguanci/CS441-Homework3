@@ -32,7 +32,7 @@ lazy val root = (project in file(".")).
       "com.github.mifmif" % "generex" % generexVersion,
       "com.amazonaws" % "aws-java-sdk-s3" % awsJavaSdkS3Version
     ),
-    assemblyJarName := "LogGenerator.jar",
+    assemblyJarName := "LogFileGenerator.jar",
   )
 
 assemblyMergeStrategy in assembly := {
