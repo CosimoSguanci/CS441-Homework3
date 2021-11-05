@@ -1,7 +1,7 @@
 package rest
 
 import akka.actor.{ActorRef, ActorSystem}
-import akka.http.scaladsl.model.HttpEntity
+import akka.http.scaladsl.model.{HttpEntity}
 import akka.http.scaladsl.server.Directives.{formFields, get, parameters, post}
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.RouteDirectives
@@ -52,6 +52,6 @@ class RouteConfig(implicit val logFinderActorRef: ActorRef,
       .param("time", time).param("dtInSeconds", dtInSeconds)
       .timeout(config.getInt("restServer.connectionTimeoutMs"), config.getInt("restServer.readTimeoutMs"))
       .asString
-    RouteDirectives.complete(HttpEntity(APIGatewayResponse.body))
+    RouteDirectives.complete(APIGatewayResponse.code, (APIGatewayResponse.body))
   }
 }
