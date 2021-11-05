@@ -36,7 +36,7 @@ At the end, all the found log files are filtered, in order to return only the lo
 
 The response given to the Client contains either the message *not found* (with status code 404) or a JSON output containing the MD5 hash of the concatenation of all the String instances associated with the found logs (and status code 200).
 
-AWS API Gateway is in charge of forwarding requests and response between the entity that has performed the request the Lambda Function. In practice, it works as a proxy for the other components that are requesting a log search to the deployed FaaS application. 
+AWS API Gateway is in charge of forwarding requests and response between the entity that has performed the request and the Lambda Function. In practice, it works as a proxy for the other components that are requesting a log search to the deployed FaaS application. 
 
 #### Example request/response
 
@@ -74,18 +74,18 @@ In order to deploy the Lambda Function to AWS Lambda, it's possible to make use 
 
 The procedure is the following:
 1) Configure AWS credentials with the AWS CLI:
-    ```
-    aws configure
-    ```
+```
+aws configure
+```
    The AWS access key, secret key and the region will be asked for the configuration.
 2) Create the `packaged.yaml` file:
-    ```
-    sam package --s3-bucket <S3_BUCKET_NAME> --output-template-file packaged.yaml
-    ```
+```
+sam package --s3-bucket <S3_BUCKET_NAME> --output-template-file packaged.yaml
+```
 3) Deploy the Lambda Function to AWS:
-    ```
-    sam deploy --template-file packaged.yaml --stack-name aws-lambda-log-finder --capabilities CAPABILITY_IAM
-    ```
+```
+sam deploy --template-file packaged.yaml --stack-name aws-lambda-log-finder --capabilities CAPABILITY_IAM
+```
 
 ### LogFinderServer
 The Server component implements the actual endpoints that will be called by the Client to search in the logs, both using gRPC and REST architectural style.
