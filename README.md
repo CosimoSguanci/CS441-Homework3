@@ -94,21 +94,38 @@ sam local start-api
 The API Gateway Proxy will start listening on port 3000 (by default for local environment).
 
 ### LogFinderServer
+
+In order to make the servers work in a `localhost` environment, it is necessary to modify the configuration to make them point to the local API Gateway Proxy:
+
+```
+restServer {
+  ...
+  APIGatewayURL = "http://127.0.0.1:3000/logfinder"
+  ...
+}
+
+akka.grpc.server {
+  ...
+  APIGatewayURL = "http://127.0.0.1:3000/logfinder"
+  ...
+}
+```
+
 To start the REST service:
 
 ```
-java -cp Server.jar rest.RESTServer
+java -cp LogFinderServer.jar rest.RESTServer
 ```
 
 To start the gRPC service>
 
 ```
-java -cp Server.jar grpc.GRPCServer
+java -cp LogFinderServer.jar grpc.GRPCServer
 ```
 
 ### LogFinderClient
 
-By default, in the `application.conf` that the clients will try to connect to are configured as the remote endpoints deployed in AWS; to make them point to `localhost` endpoints the following change in configuration is needed:
+By default, in the `application.conf` the endpoints that the clients will try to connect to are configured as the remote endpoints deployed in AWS; to make them point to `localhost` endpoints the following change in configuration is needed:
 
 ```
 akka.grpc.client {
