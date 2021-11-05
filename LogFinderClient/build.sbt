@@ -15,6 +15,7 @@ val akkaHttpVersion = "10.2.6"
 val akkaStreamVersion = "2.6.17"
 val akkaHttpSprayJsonVersion = "10.2.6"
 val scalajVersion = "2.4.2"
+val apacheHttpClientVersion = "4.5.13"
 
 lazy val akkaGrpcVersion = "2.1.0"
 
@@ -38,6 +39,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-stream" % akkaStreamVersion,
   "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpSprayJsonVersion,
   "org.scalaj" %% "scalaj-http" % scalajVersion,
+  "org.apache.httpcomponents" % "httpclient" % apacheHttpClientVersion,
   "com.typesafe.akka" %% "akka-http2-support" % akkaHttpVersion,
   "com.typesafe.akka" %% "akka-actor-typed" % akkaStreamVersion,
   "com.typesafe.akka" %% "akka-discovery" % akkaStreamVersion,
@@ -46,7 +48,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-stream-testkit" % akkaStreamVersion % Test,
 )
 
-assemblyJarName in assembly := "client.jar"
+assemblyJarName in assembly := "LogFinderClient.jar"
 
 assemblyMergeStrategy in assembly := {
   case PathList("META-INF", xs @ _*) => MergeStrategy.discard
