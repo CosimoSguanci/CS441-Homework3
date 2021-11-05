@@ -17,7 +17,7 @@ s3ObjectKey = "log"
 In order to continuously add new logs to S3, it's possible to create a simple shell script that periodically launch the JAR of the `LogFileGenerator`.
 
 #### Deployment
-This module has been deployed to AWS EC2, on a `t2.micro` instance. Once the EC2 instance has been launched from the AWS console, the procedure needed to deploy the application are the following:
+This module has been deployed to AWS EC2, on a `t2.micro` instance. Once the EC2 instance has been launched from the AWS console, the procedure needed to deploy the application is the following:
 
 1) Transfer the executable JAR file to the remote instance (the .pem certificated generated on the instance creation is needed for SSH/SCP authentication):
 ```
@@ -131,6 +131,33 @@ gRPC client side:
 [2021-11-05 11:23:29,864] [INFO] [grpc.LogFinderClient$] [run-main-0] [] - Performing request, input: time = 18:34:32, dt = 10
 [2021-11-05 11:23:31,348] [INFO] [grpc.LogFinderClient$] [LogFinderClient-akka.actor.default-dispatcher-3] [] - Received reply: FindLogReply({"result_md5": "af67e8751cf8eb878c39976f39bf36b8"},UnknownFieldSet(Map()))
 ```
+
+#### Deployment
+This module has been deployed to AWS EC2, on a `t2.micro` instance. Both the gRPC Server and the REST Server are packaged in the same module (`LogFinderServer`), so we will need to execute the same JAR two times (with different main classes) in order to launch both services.
+
+Once the EC2 instance has been launched from the AWS console, the procedure needed to deploy the application is the following:
+
+1) Transfer the executable JAR file to the remote instance (the .pem certificated generated on the instance creation is needed for SSH/SCP authentication):
+```
+chmod 400 Server.pem
+scp -i ./Server.pem ./Server.jar ec2-user@<EC2_INSTANCE_ENDPOINT>:~
+```
+
+2) Then we need to access the remote instance via SSH or by using the EC2 Instance Connect feature from the console. We can use the `screen` tool already installed on the OS (Amazon Linux 2) in order to leave both the Servers running also when we detach from the SSH session:
+
+To launch the REST Server:
+```
+screen
+java -cp Server.jar rest.RESTServer
+```
+
+To launch the gRPC Server:
+```
+screen
+java -cp Server.jar grpc.GRPCServer
+```
+
+In order for our deployed services to be accessible from outside, we will need to configure the security policy in order to allow inbound connections on ports 8080 (REST) and 8081 (gRPC).
 
 #### REST
 The REST architectural style backend has been implemented by making use of the `Akka HTTP` library. Both `GET` and `POST` endpoints are implemented to perform the search.
