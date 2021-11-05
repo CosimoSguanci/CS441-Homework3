@@ -184,7 +184,7 @@ curl -X POST http://localhost:8080/api/findlogs -H "Content-Type: application/x-
 ### LogFinderClient
 Regarding the implemented clients, they are simple Scala applications useful to show how to perform calls to the implemented gRPC/REST endpoints.
 
-For the REST Client, the `scalaj-http` and Apache `httpclient` have been used to make requests, while the gRPC we made use again of the `Akka gRPC` library to send RPCs to the backend.
+For the REST Client, the `scalaj-http` and Apache `httpclient` have been used to make requests, while the gRPC the `Akka gRPC` library has been used again to send RPCs to the backend.
 
 
 

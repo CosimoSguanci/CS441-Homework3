@@ -2,8 +2,8 @@
 ## csguan2@uic.edu - 3rd Homework (CS441)
 
 For this homework, four separate modules have been developed:
-- LogFileGenerator: it generates log data and send this logs to an AWS S3 bucket for other computations to take place. In production, this module is deployed to AWS EC2.
-- LogFinderLambda: the Function that makes use of the AWS FaaS (AWS Lambda) to perform a binary search on log files to determine if a log with an associated string instance that respects the configured Regex pattern can be found in logs, given a time interval as input.
+- LogFileGenerator: it generates log data and send this logs to an AWS S3 bucket for other computations to take place.
+- LogFinderLambda: the Function that makes use of the AWS FaaS (AWS Lambda) to perform a binary search on log files to determine if logs with associated string instances that match the configured Regex pattern can be found in logs, given a time interval as input.
 - LogFinderServer: implements RESTful and gRPC services that act as a middleware between the client and the deployed Lambda Function.
 - LogFinderClient: sample client applications that make calls to the Server (both as REST commands and gRPC calls) to perform logs searches.
 
