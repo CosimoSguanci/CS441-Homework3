@@ -67,6 +67,8 @@ When no logs are found, the response will be the following:
 }
 ```
 
+As we can see, instead of responding true or false to signal the presence or the absence of the searched logs, it is possible to use the responses shown above: if the JSON response contains the key `result_md5` then this actually signals the presence of the searched log, otherwise it wasn't found.
+
 #### Deployment
 In order to deploy the Lambda Function to AWS Lambda, it's possible to make use of the AWS SAM CLI, as described in the readme.
 
