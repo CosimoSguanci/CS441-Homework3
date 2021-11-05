@@ -22,7 +22,7 @@ object LogFinderClient {
 
     val client = LogFinderServiceClient(GrpcClientSettings.fromConfig("logfinder.LogFinderService").withTls(false))
 
-    singleRequestReply(config.getString("akka.grpc.client.example_time"), config.getString("akka.grpc.client.example_dt_seconds"))
+    singleRequestReply(config.getString("akka.grpc.client.defaultTime"), config.getString("akka.grpc.client.defaultDtSeconds"))
 
     def singleRequestReply(time: String, dtInSeconds: String): Unit = {
       println(s"Performing request, input: time = $time, dt = $dtInSeconds")
