@@ -15,7 +15,7 @@ public class ApiGatewayProxyHandler implements RequestHandler<APIGatewayProxyReq
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent
                                                               requestEvent, Context context) {
 
-        LogFinderLambda.Response response = LogFinderLambda.handle(requestEvent); // requestEvent
+        LogFinderLambda.Response response = LogFinderLambda.handle(); // requestEvent
 
         return new APIGatewayProxyResponseEvent()
                 .withBody(response.body())

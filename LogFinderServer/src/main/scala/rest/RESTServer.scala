@@ -28,6 +28,6 @@ object RESTServer extends App {
     }
   }
 
-  Http().newServerAt("localhost", config.getInt("restServer.port")).bind(routes)
+  Http().newServerAt("0.0.0.0", config.getInt("restServer.port")).bind(routes)
   logger.info(s"Server started at port ${config.getInt("restServer.port")}...")
 }

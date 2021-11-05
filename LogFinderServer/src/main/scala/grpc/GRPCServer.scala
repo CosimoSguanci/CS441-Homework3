@@ -38,7 +38,7 @@ class GRPCServer(system: ActorSystem[_]) {
       LogFinderServiceHandler(new LogFinderServiceImpl(system))
 
     val bound: Future[Http.ServerBinding] = Http(system)
-      .newServerAt(interface = "127.0.0.1", port = config.getInt("akka.grpc.server.port"))
+      .newServerAt(interface = "0.0.0.0", port = config.getInt("akka.grpc.server.port"))
       .bind(service)
       .map(_.addToCoordinatedShutdown(hardTerminationDeadline = 10.seconds))
 

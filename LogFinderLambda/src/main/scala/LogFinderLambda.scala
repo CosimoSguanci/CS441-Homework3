@@ -44,7 +44,7 @@ object LogFinderLambda {
    * @param requestEvent the API Gateway Request Event that contains the parameters passed by the Client
    * @return the HTTP Response with a JSON response body, that contains either the MD5 hash of the results or an error message.
    */
-  def handle(requestEvent: APIGatewayProxyRequestEvent): Response = { // requestEvent: APIGatewayProxyRequestEvent
+  @main def handle(): Response = { // requestEvent: APIGatewayProxyRequestEvent
 
     val logger = CreateLogger(classOf[LogFinderLambda.type])
 
@@ -55,15 +55,15 @@ object LogFinderLambda {
       case None => throw new RuntimeException("Cannot obtain a reference to the config data.")
     }
 
-    val parameters: Map[String, String] = requestEvent.getQueryStringParameters.asScala.toMap
+    //val parameters: Map[String, String] = requestEvent.getQueryStringParameters.asScala.toMap
 
-    val time: LocalTime = LocalTime.parse(parameters.get("time").get)
-    val dtInSeconds: Long = parameters.get("dtInSeconds").get.toLong
+    //val time: LocalTime = LocalTime.parse(parameters.get("time").get)
+    //val dtInSeconds: Long = parameters.get("dtInSeconds").get.toLong
 
-    //val time: LocalTime = LocalTime.parse("21:59:29")
-    //val dtInSeconds: Long = "1".toLong
+    val time: LocalTime = LocalTime.parse("22:40:22")
+    val dtInSeconds: Long = "1".toLong
 
-    logger.info(s"Parameters: Time ${parameters.get("time").get}, dt ${parameters.get("dtInSeconds").get} s")
+    //logger.info(s"Parameters: Time ${parameters.get("time").get}, dt ${parameters.get("dtInSeconds").get} s")
 
     try {
       logger.info("Trying to authenticate on AWS S3...")
