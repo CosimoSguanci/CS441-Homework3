@@ -25,7 +25,7 @@ object LogFinderClient {
     singleRequestReply(config.getString("akka.grpc.client.defaultTime"), config.getString("akka.grpc.client.defaultDtSeconds"))
 
     def singleRequestReply(time: String, dtInSeconds: String): Unit = {
-      println(s"Performing request, input: time = $time, dt = $dtInSeconds")
+      logger.info(s"Performing request, input: time = $time, dt = $dtInSeconds")
       val reply = client.findLog(FindLogRequest(time, dtInSeconds))
       reply.onComplete {
         case Success(msg) =>
