@@ -78,6 +78,7 @@ The procedure is the following:
 aws configure
 ```
    The AWS access key, secret key and the region will be asked for the configuration.
+
 2) Create the `packaged.yaml` file:
 ```
 sam package --s3-bucket <S3_BUCKET_NAME> --output-template-file packaged.yaml
