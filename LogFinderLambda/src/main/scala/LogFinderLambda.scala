@@ -45,27 +45,22 @@ object LogFinderLambda {
    * @return the HTTP Response with a JSON response body, that contains either the MD5 hash of the results or an error message.
    */
   def handle(requestEvent: APIGatewayProxyRequestEvent): Response = { // requestEvent: APIGatewayProxyRequestEvent
-
     val logger = CreateLogger(classOf[LogFinderLambda.type])
-
-    logger.info("Lambda Function Invoked...")
-
     val config = ObtainConfigReference("randomLogGenerator") match {
       case Some(value) => value
       case None => throw new RuntimeException("Cannot obtain a reference to the config data.")
     }
 
-    val parameters: Map[String, String] = requestEvent.getQueryStringParameters.asScala.toMap
-
-    val time: LocalTime = LocalTime.parse(parameters.get("time").get)
-    val dtInSeconds: Long = parameters.get("dtInSeconds").get.toLong
-
-    //val time: LocalTime = LocalTime.parse("22:40:22")
-    //val dtInSeconds: Long = "1".toLong
-
-    logger.info(s"Parameters: Time ${parameters.get("time").get}, dt ${parameters.get("dtInSeconds").get} s")
-
     try {
+      logger.info("Lambda Function Invoked...")
+
+      val parameters: Map[String, String] = requestEvent.getQueryStringParameters.asScala.toMap
+
+      val time: LocalTime = LocalTime.parse(parameters.get("time").get)
+      val dtInSeconds: Long = parameters.get("dtInSeconds").get.toLong
+
+      logger.info(s"Parameters: Time ${parameters.get("time").get}, dt ${parameters.get("dtInSeconds").get} s")
+
       logger.info("Trying to authenticate on AWS S3...")
 
       val awsCredentials: BasicAWSCredentials = new BasicAWSCredentials(config.getString("randomLogGenerator.awsAccessKey"), config.getString("randomLogGenerator.awsSecretKey"))
@@ -91,6 +86,7 @@ object LogFinderLambda {
 
       val responseJson = buildJsonString(results, responseStatusCode, config.getString("randomLogGenerator.lineSplitter"))
       Response(responseJson, Map("Content-Type" -> "application/json"), statusCode = responseStatusCode)
+
     } catch {
       case ex: AmazonS3Exception => {
         // This means that there are no log files in S3 bucket
@@ -99,6 +95,13 @@ object LogFinderLambda {
 
         val responseStatusCode = 404
         val responseJson = buildJsonString(Vector.empty, responseStatusCode, config.getString("randomLogGenerator.lineSplitter"))
+        Response(responseJson, Map("Content-Type" -> "application/json"), statusCode = responseStatusCode)
+      }
+      case ex: Exception => {
+        logger.warn("Caught Exception for Lambda Function Invocation...")
+        
+        val responseStatusCode = 500
+        val responseJson = buildErrorJsonString()
         Response(responseJson, Map("Content-Type" -> "application/json"), statusCode = responseStatusCode)
       }
     }
@@ -124,6 +127,15 @@ object LogFinderLambda {
 
     val resultsMD5: String = DigestUtils.md5Hex(concatenatedResults)
     return s"{\"result_md5\": \"$resultsMD5\"}"
+  }
+
+  /**
+   * Builds the JSON string to be used as Response body in case a malformed input is passed by the Client
+   *
+   * @return the JSON string to be embedded in the HTTP Response Body
+   */
+  def buildErrorJsonString(): String = {
+    return "{\"error\": \"malformed input\"}"
   }
 
   /**

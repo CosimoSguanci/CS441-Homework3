@@ -32,6 +32,16 @@ class LogFinderLambdaTest extends AnyFlatSpec with Matchers {
     jsonMap.values.get("error").get shouldBe "not found"
   }
 
+  it should "correctly builds JSON Strings for errors" in {
+
+    val jsonString: String = LogFinderLambda.buildErrorJsonString()
+
+    implicit val formats: DefaultFormats.type = DefaultFormats
+
+    val jsonMap: JObject = parse(jsonString).asInstanceOf[JObject]
+    jsonMap.values.get("error").get shouldBe "malformed input"
+  }
+
   it should "correctly locate a log that is in the specified time interval" in {
     val logs: Vector[String] = Vector(
       "11:44:27.098 [scala-execution-context-global-14] WARN  HelperUtils.Parameters$ - testtesttesttesttest",
