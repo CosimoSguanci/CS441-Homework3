@@ -14,7 +14,18 @@ s3BucketName = ...
 s3ObjectKey = "log"
 ```
 
-In order to continuously add new logs to S3, it's possible to create a simple shell script that periodically launch the JAR of the `LogFileGenerator`.
+In order to continuously add new logs to S3, it's possible to use `crontab` to run a simple shell script that periodically launches the JAR file of `LogFileGenerator`. An example is the following cron job:
+
+```
+*/30 * * * *  /home/ec2-user/script.sh
+```
+This job launches the script once every 30 minutes. The script only executes the JAR file:
+
+```
+#!/bin/bash
+
+java -jar LogFileGenerator.jar
+```
 
 #### Deployment
 This module has been deployed to AWS EC2, on a `t2.micro` instance. Once the EC2 instance has been launched from the AWS console, the procedure needed to deploy the application is the following:
