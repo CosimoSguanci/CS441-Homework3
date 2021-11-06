@@ -165,6 +165,6 @@ defaultDtSeconds = Y
 
 More details about the implemented architecture can be found in the `doc/DOC.md` file.
 
-Video showing the deployment on AWS: WIP
+Video showing the deployment on AWS: https://youtu.be/mMRtTSxa6BM
 
 
